@@ -1,11 +1,11 @@
 const CACHE_NAME = 'raylob-v1';
 const urlsToCache = [
-  '/',
-  '/index.html',
-  '/style.css',
-  '/app.js',
-  '/books.js',
-  '/manifest.json'
+  '/myapp/',
+  '/myapp/index.html',
+  '/myapp/style.css',
+  '/myapp/app.js',
+  '/myapp/books.js',
+  '/myapp/manifest.json'
 ];
 
 self.addEventListener('install', event => {
