@@ -24,7 +24,7 @@ async function getFileSizeFromUrl(url) {
     } catch (error) {
         console.log('⚠️ فشل جلب حجم الملف:', url);
         return 'غير معروف';
-    }
+    } 
 }
 
 function showToast(message, type = 'success', duration = 2000) {
