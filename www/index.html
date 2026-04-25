@@ -1,0 +1,690 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes, viewport-fit=cover">
+    <title>المكتبة المتوهجة • مكتبتك الرقمية</title>
+    
+    <!-- Font Awesome للأيقونات -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    
+    <!-- PWA Meta -->
+    <link rel="manifest" href="manifest.json">
+    <link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
+    <link rel="apple-touch-icon" href="icon-192.png">
+    <meta name="theme-color" content="#00ffc3">
+    
+    <!-- مكتبة PDF.js -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.min.js"></script>
+    
+    <!-- ملف التنسيقات -->
+    <link rel="stylesheet" href="style.css">
+
+    <!-- PWA -->
+<link rel="manifest" href="manifest.json">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="المكتبة المتوهجة">
+<link rel="apple-touch-icon" href="icon-192.png">
+<meta name="theme-color" content="#00ffc3">
+
+<script>
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('/sw.js');
+}
+</script>
+</head>
+<body>
+<!-- ========================================= -->
+<!-- 📖 قارئ PDF - مع قائمة الإعدادات            -->
+<!-- ========================================= -->
+<div class="reader-overlay" id="readerOverlay"></div>
+<div class="reader-page" id="readerPage">
+    <!-- شريط علوي -->
+    <div class="reader-header">
+        <button class="reader-back-btn" id="readerBackBtn"><i class="fas fa-arrow-right"></i></button>
+        <h3 class="reader-book-title" id="readerBookTitle">الكتاب</h3>
+        <button class="reader-settings-btn" id="readerSettingsBtn" title="الإعدادات">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="12" cy="12" r="3"></circle>
+                <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+            </svg>
+        </button>
+    </div>
+    
+    <!-- قائمة إعدادات القارئ - مثل إعدادات التطبيق -->
+<div class="reader-settings-overlay" id="readerSettingsOverlay"></div>
+<div class="reader-settings-modal" id="readerSettingsMenu">
+    <div class="reader-settings-header">
+        <h3><i class="fas fa-cog"></i> إعدادات القارئ</h3>
+        <button class="reader-settings-close" id="readerSettingsClose"><i class="fas fa-times"></i></button>
+    </div>
+    <div class="reader-settings-content">
+       
+        
+                <button class="reader-setting-item" id="readerAutoScrollBtn">
+            <i class="fas fa-play-circle" style="color:var(--neon-color);"></i>
+            <div class="reader-setting-info">
+                <span>التمرير التلقائي</span>
+                <span class="reader-setting-desc" id="readerAutoScrollStatus">إيقاف</span>
+            </div>
+            <i class="fas fa-chevron-left" style="color:var(--text-muted);"></i>
+        </button>
+                     <button class="reader-setting-item" id="readerNightMode2">
+            <i class="fas fa-moon" style="color:var(--neon-color);"></i>
+            <div class="reader-setting-info">
+                <span>الوضع الليلي</span>
+                <span class="reader-setting-desc" id="readerNightStatus">إيقاف</span>
+            </div>
+            <i class="fas fa-chevron-left" style="color:var(--text-muted);"></i>
+        </button>
+                <button class="reader-setting-item" id="readerScrollModeBtn">
+            <i class="fas fa-scroll" style="color:var(--neon-color);"></i>
+            <div class="reader-setting-info">
+                <span>وضع التمرير</span>
+                <span class="reader-setting-desc" id="readerScrollStatus">إيقاف</span>
+            </div>
+            <i class="fas fa-chevron-left" style="color:var(--text-muted);"></i>
+        </button>
+        <button class="reader-setting-item" id="readerFullscreenBtn">
+            <i class="fas fa-expand" style="color:var(--neon-color);"></i>
+            <div class="reader-setting-info">
+                <span>ملء الشاشة</span>
+                <span class="reader-setting-desc" id="readerFullscreenStatus">إيقاف</span>
+            </div>
+            <i class="fas fa-chevron-left" style="color:var(--text-muted);"></i>
+        </button>
+        <button class="reader-setting-item" id="readerJumpBtn2">
+            <i class="fas fa-map-marker-alt" style="color:var(--neon-color);"></i>
+            <div class="reader-setting-info">
+                <span>القفز إلى صفحة</span>
+                <span class="reader-setting-desc">اختر الصفحة</span>
+            </div>
+            <i class="fas fa-chevron-left" style="color:var(--text-muted);"></i>
+        </button>
+    </div>
+</div>
+    
+    <!-- المحتوى -->
+    <div class="reader-content" id="readerContent">
+        <div class="reader-loading" id="readerLoading">
+            <div class="reader-spinner"></div>
+            <p>📖 جاري تحميل الكتاب...</p>
+        </div>
+        <canvas id="pdfCanvas"></canvas>
+    </div>
+    
+    <!-- شريط سفلي -->
+    <div class="reader-controls">
+        <button class="reader-nav-btn" id="readerPrevBtn"><i class="fas fa-chevron-right"></i></button>
+        <div class="reader-page-info">
+            <div class="reader-progress-bar">
+                <div class="reader-progress-fill" id="readerProgressFill"></div>
+            </div>
+            <span class="reader-page-indicator"><span id="currentPage">1</span> / <span id="totalPages">0</span></span>
+        </div>
+        <button class="reader-nav-btn" id="readerNextBtn"><i class="fas fa-chevron-left"></i></button>
+    </div>
+        
+        <!-- نافذة سرعة التمرير التلقائي -->
+    <div class="reader-speed-modal" id="readerSpeedModal">
+        <div class="reader-speed-content">
+            <h4>⚡ سرعة التمرير التلقائي</h4>
+            <div class="reader-speed-options">
+<button class="reader-speed-btn" data-speed="0.5">
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+    <span>بطيء</span>
+</button>
+<button class="reader-speed-btn active" data-speed="1">
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 10"/><polyline points="12 12 8 12"/></svg>
+    <span>عادي</span>
+</button>
+<button class="reader-speed-btn" data-speed="2">
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
+    <span>سريع</span>
+</button>
+<button class="reader-speed-btn" data-speed="3">
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="8 12 12 8 16 12"/><polyline points="8 16 12 12 16 16"/></svg>
+    <span>سريع جداً</span>
+</button>
+            </div>
+                        <button class="reader-speed-go" style="width:100%;padding:12px;border-radius:12px;background:var(--neon-color);color:var(--bg-primary);border:none;cursor:pointer;font-weight:700;font-size:1rem;margin-bottom:8px;">▶ ابدأ التمرير</button>
+            <button class="reader-speed-cancel" id="readerSpeedCancel">إلغاء</button>
+        </div>
+    </div>
+    <!-- نافذة القفز -->
+    <div class="reader-jump-modal" id="readerJumpModal">
+        <div class="reader-jump-content">
+            <h4>🔍 القفز إلى صفحة</h4>
+            <input type="number" id="readerJumpInput" min="1" placeholder="رقم الصفحة">
+            <div class="reader-jump-actions">
+                <button id="readerJumpCancel">إلغاء</button>
+                <button id="readerJumpGo">اذهب</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+    <!-- ========================================= -->
+    <!-- 1. أيقونات SVG مخصصة                      -->
+    <!-- ========================================= -->
+    <svg style="display: none;">
+        <defs>
+            <symbol id="icon-star" viewBox="0 0 24 24">
+                <path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z" fill="currentColor"/>
+            </symbol>
+            <symbol id="icon-download" viewBox="0 0 24 24">
+                <path d="M5 20h14v-2H5v2zM19 9h-4V3H9v6H5l7 7 7-7z" fill="currentColor"/>
+            </symbol>
+            <symbol id="icon-eye" viewBox="0 0 24 24">
+                <path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z" fill="currentColor"/>
+            </symbol>
+            <symbol id="icon-book" viewBox="0 0 24 24">
+                <path d="M4 6h16v2H4V6zm0 4h16v2H4v-2zm0 4h16v2H4v-2zm16-12H4c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm0 18H4V4h16v16z" fill="currentColor"/>
+            </symbol>
+            <symbol id="icon-calendar" viewBox="0 0 24 24">
+                <path d="M19 3h-1V1h-2v2H8V1H6v2H5c-1.11 0-1.99.9-1.99 2L3 19c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V8h14v11zM7 10h5v5H7v-5z" fill="currentColor"/>
+            </symbol>
+            <symbol id="icon-clock" viewBox="0 0 24 24">
+                <path d="M11.99 2C6.47 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 11.99 2zM12 20c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8zm.5-13H11v6l5.25 3.15.75-1.23-4.5-2.67V7z" fill="currentColor"/>
+            </symbol>
+        </defs>
+    </svg>
+
+   <!-- ═══════════════════════════════════════════ -->
+<!-- شاشات البداية الخمسة - نسخة متطورة جداً   -->
+<!-- ═══════════════════════════════════════════ -->
+
+<!-- 🌌 النمط 1: الفضاء العميق -->
+<div class="splash-screen" id="splashScreen1" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; z-index:9999; background:#000010; overflow:hidden; align-items:center; justify-content:center;">
+    <canvas id="splashCanvas1" style="position:absolute;top:0;left:0;width:100%;height:100%;"></canvas>
+    <div style="position:relative;z-index:1;text-align:center;">
+        <div style="width:120px;height:120px;margin:0 auto 2rem;position:relative;">
+            <div style="position:absolute;width:100%;height:100%;border-radius:50%;background:conic-gradient(#667eea,#764ba2,#e0c3fc,#667eea);animation:orbitSpin 3s linear infinite;filter:blur(20px);opacity:0.6;"></div>
+            <div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:80px;height:80px;background:radial-gradient(circle,#1a1a4e,#0d0d2b);border-radius:50%;display:flex;align-items:center;justify-content:center;border:2px solid rgba(102,126,234,0.5);box-shadow:0 0 60px rgba(102,126,234,0.8),inset 0 0 30px rgba(102,126,234,0.3);">
+                <i class="fas fa-book-open" style="font-size:2rem;color:#fff;filter:drop-shadow(0 0 20px #667eea);animation:floatIcon 2s ease-in-out infinite;"></i>
+            </div>
+            <div class="orbit-ring" style="position:absolute;width:140px;height:140px;top:-10px;left:-10px;border:1px solid rgba(102,126,234,0.3);border-radius:50%;animation:orbitSpin 4s linear infinite reverse;"></div>
+            <div class="orbit-dot" style="position:absolute;width:6px;height:6px;background:#e0c3fc;border-radius:50%;top:-13px;left:50%;box-shadow:0 0 15px #e0c3fc;animation:orbitDot 4s linear infinite;"></div>
+        </div>
+        <h1 style="display:flex;flex-direction:column;gap:0.5rem;">
+            <span class="splash-text-glow" style="font-size:3rem;font-weight:900;color:#fff;letter-spacing:8px;animation:textSlideUp 0.8s ease-out;">المكتبة</span>
+            <span class="splash-text-gradient" style="font-size:2.2rem;font-weight:700;background:linear-gradient(135deg,#667eea,#e0c3fc,#764ba2);-webkit-background-clip:text;-webkit-text-fill-color:transparent;letter-spacing:6px;animation:textSlideUp 0.8s ease-out 0.3s both;">المتوهجة</span>
+        </h1>
+        <div style="margin-top:2.5rem;display:flex;gap:8px;justify-content:center;">
+            <div class="loader-particle" style="width:10px;height:10px;background:#667eea;border-radius:50%;animation:particleBounce 1.2s ease-in-out infinite;"></div>
+            <div class="loader-particle" style="width:10px;height:10px;background:#764ba2;border-radius:50%;animation:particleBounce 1.2s ease-in-out 0.15s infinite;"></div>
+            <div class="loader-particle" style="width:10px;height:10px;background:#e0c3fc;border-radius:50%;animation:particleBounce 1.2s ease-in-out 0.3s infinite;"></div>
+            <div class="loader-particle" style="width:10px;height:10px;background:#667eea;border-radius:50%;animation:particleBounce 1.2s ease-in-out 0.45s infinite;"></div>
+            <div class="loader-particle" style="width:10px;height:10px;background:#764ba2;border-radius:50%;animation:particleBounce 1.2s ease-in-out 0.6s infinite;"></div>
+        </div>
+        <p style="color:#7b8cbf;margin-top:1rem;letter-spacing:4px;font-size:0.8rem;animation:fadeIn 1s ease 1s both;">🚀 استكشف عالم الكتب</p>
+    </div>
+</div>
+
+<!-- ✨ النمط 2: الذهب الملكي -->
+<div class="splash-screen" id="splashScreen2" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; z-index:9999; background:linear-gradient(135deg,#0a0a0a,#1a1000,#0a0a0a); overflow:hidden; align-items:center; justify-content:center;">
+    <div style="position:absolute;top:0;left:0;width:100%;height:100%;">
+        <div class="golden-rain" style="position:absolute;width:2px;height:60px;background:linear-gradient(180deg,transparent,#ffd700);top:-60px;left:10%;animation:goldenRain 2s linear infinite;opacity:0.6;"></div>
+        <div class="golden-rain" style="position:absolute;width:2px;height:40px;background:linear-gradient(180deg,transparent,#ffb700);top:-40px;left:30%;animation:goldenRain 2.5s linear 0.5s infinite;opacity:0.4;"></div>
+        <div class="golden-rain" style="position:absolute;width:2px;height:55px;background:linear-gradient(180deg,transparent,#ffd700);top:-55px;left:50%;animation:goldenRain 2.2s linear 1s infinite;opacity:0.5;"></div>
+        <div class="golden-rain" style="position:absolute;width:2px;height:45px;background:linear-gradient(180deg,transparent,#ff9500);top:-45px;left:70%;animation:goldenRain 2.8s linear 0.3s infinite;opacity:0.4;"></div>
+        <div class="golden-rain" style="position:absolute;width:2px;height:50px;background:linear-gradient(180deg,transparent,#ffcc00);top:-50px;left:85%;animation:goldenRain 2.4s linear 1.5s infinite;opacity:0.5;"></div>
+    </div>
+    <div style="position:relative;z-index:1;text-align:center;">
+        <div style="width:120px;height:120px;margin:0 auto 2rem;position:relative;">
+            <div style="position:absolute;width:100%;height:100%;border-radius:50%;border:3px solid transparent;border-top-color:#ffd700;border-right-color:#ff8c00;animation:goldenSpin 2s linear infinite;"></div>
+            <div style="position:absolute;width:90%;height:90%;top:5%;left:5%;border-radius:50%;border:2px solid transparent;border-bottom-color:#ffb700;border-left-color:#ffd700;animation:goldenSpin 3s linear infinite reverse;"></div>
+            <div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:70px;height:70px;background:radial-gradient(circle,#2a1a00,#1a1000);border-radius:50%;display:flex;align-items:center;justify-content:center;box-shadow:0 0 50px rgba(255,215,0,0.5);">
+                <i class="fas fa-crown" style="font-size:2rem;color:#ffd700;filter:drop-shadow(0 0 20px #ffd700);animation:floatIcon 2.5s ease-in-out infinite;"></i>
+            </div>
+        </div>
+        <h1>
+            <span style="display:block;font-size:3rem;font-weight:900;color:#ffd700;text-shadow:0 0 30px #ffd700,0 0 60px #ff8c00,0 0 90px #ffd700;letter-spacing:10px;animation:goldenTextGlow 2s ease-in-out infinite;">المكتبة</span>
+            <span style="display:block;font-size:2rem;font-weight:700;color:#ffb700;text-shadow:0 0 20px #ffd700;letter-spacing:8px;margin-top:0.3rem;">المتوهجة</span>
+        </h1>
+        <div style="margin-top:2.5rem;width:200px;height:2px;background:rgba(255,215,0,0.2);border-radius:2px;margin-left:auto;margin-right:auto;overflow:hidden;">
+            <div style="width:0%;height:100%;background:linear-gradient(90deg,#ffd700,#ff8c00,#ffd700);border-radius:2px;animation:goldenProgress 2.8s ease-out forwards;box-shadow:0 0 20px #ffd700;"></div>
+        </div>
+        <p style="color:#b8960c;margin-top:1rem;letter-spacing:4px;font-size:0.8rem;">✦ المكتبة الملكية ✦</p>
+    </div>
+</div>
+
+<!-- 🔥 النمط 3: النار والحمم -->
+<div class="splash-screen" id="splashScreen3" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; z-index:9999; background:#0a0000; overflow:hidden; align-items:center; justify-content:center;">
+    <canvas id="splashCanvas3" style="position:absolute;top:0;left:0;width:100%;height:100%;"></canvas>
+    <div style="position:relative;z-index:1;text-align:center;">
+        <div style="width:120px;height:120px;margin:0 auto 2rem;position:relative;">
+            <div style="position:absolute;width:100%;height:100%;border-radius:50%;background:radial-gradient(circle,rgba(255,100,0,0.4),transparent 70%);animation:firePulse 1.5s ease-in-out infinite;"></div>
+            <div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:80px;height:80px;background:radial-gradient(circle,#2a0500,#1a0200);border-radius:50%;display:flex;align-items:center;justify-content:center;border:2px solid rgba(255,80,0,0.6);box-shadow:0 0 60px rgba(255,60,0,0.8);">
+                <i class="fas fa-fire" style="font-size:2rem;color:#ff4500;filter:drop-shadow(0 0 25px #ff4500);animation:floatIcon 1.5s ease-in-out infinite;"></i>
+            </div>
+            <div class="ember" style="position:absolute;width:4px;height:4px;background:#ffd700;border-radius:50%;top:0;left:30%;animation:emberFloat 2s ease-out infinite;box-shadow:0 0 8px #ffd700;"></div>
+            <div class="ember" style="position:absolute;width:3px;height:3px;background:#ff8c00;border-radius:50%;top:10px;right:25%;animation:emberFloat 2.5s ease-out 0.5s infinite;box-shadow:0 0 6px #ff8c00;"></div>
+            <div class="ember" style="position:absolute;width:5px;height:5px;background:#ff4500;border-radius:50%;bottom:5px;left:20%;animation:emberFloat 1.8s ease-out 1s infinite;box-shadow:0 0 10px #ff4500;"></div>
+        </div>
+        <h1>
+            <span style="display:block;font-size:3rem;font-weight:900;color:#fff;text-shadow:0 0 30px #ff4500,0 0 60px #ff6347,0 0 90px #ff4500;letter-spacing:10px;">المكتبة</span>
+            <span style="display:block;font-size:2rem;font-weight:700;color:#ff6b4a;text-shadow:0 0 20px #ff4500;letter-spacing:8px;margin-top:0.3rem;">المتوهجة</span>
+        </h1>
+        <div style="margin-top:2.5rem;display:flex;gap:5px;justify-content:center;">
+            <div style="width:30px;height:40px;background:linear-gradient(180deg,#ffd700,#ff4500,transparent);border-radius:5px 5px 0 0;animation:flameDance 0.8s ease-in-out infinite;transform-origin:bottom center;"></div>
+            <div style="width:25px;height:35px;background:linear-gradient(180deg,#ffb700,#ff4500,transparent);border-radius:5px 5px 0 0;animation:flameDance 0.9s ease-in-out 0.2s infinite;transform-origin:bottom center;"></div>
+            <div style="width:35px;height:45px;background:linear-gradient(180deg,#ffd700,#ff6347,transparent);border-radius:5px 5px 0 0;animation:flameDance 0.7s ease-in-out 0.4s infinite;transform-origin:bottom center;"></div>
+            <div style="width:28px;height:38px;background:linear-gradient(180deg,#ffcc00,#ff4500,transparent);border-radius:5px 5px 0 0;animation:flameDance 1s ease-in-out 0.1s infinite;transform-origin:bottom center;"></div>
+            <div style="width:32px;height:42px;background:linear-gradient(180deg,#ffd700,#ff4500,transparent);border-radius:5px 5px 0 0;animation:flameDance 0.85s ease-in-out 0.6s infinite;transform-origin:bottom center;"></div>
+        </div>
+        <p style="color:#ff6b4a;margin-top:1rem;letter-spacing:4px;font-size:0.8rem;">🔥 اشتعل شغفاً بالقراءة</p>
+    </div>
+</div>
+
+<!-- 🌧️ النمط 4: العاصفة -->
+<div class="splash-screen" id="splashScreen4" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; z-index:9999; background:linear-gradient(180deg,#050510,#0a0a2e,#050510); overflow:hidden; align-items:center; justify-content:center;">
+    <canvas id="splashCanvas4" style="position:absolute;top:0;left:0;width:100%;height:100%;"></canvas>
+    <div style="position:relative;z-index:1;text-align:center;">
+        <div style="width:120px;height:120px;margin:0 auto 2rem;position:relative;">
+            <div style="position:absolute;width:100%;height:100%;border-radius:50%;background:conic-gradient(rgba(72,52,212,0.3),rgba(104,109,224,0.3),rgba(162,155,254,0.3),rgba(72,52,212,0.3));animation:orbitSpin 4s linear infinite;filter:blur(15px);"></div>
+            <div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:80px;height:80px;background:radial-gradient(circle,#1a1a3e,#0d0d2b);border-radius:50%;display:flex;align-items:center;justify-content:center;border:2px solid rgba(72,52,212,0.6);box-shadow:0 0 60px rgba(72,52,212,0.6);">
+                <i class="fas fa-cloud-rain" style="font-size:2rem;color:#a29bfe;filter:drop-shadow(0 0 20px #a29bfe);animation:floatIcon 3s ease-in-out infinite;"></i>
+            </div>
+            <div class="raindrop-splash" style="position:absolute;width:3px;height:15px;background:linear-gradient(180deg,transparent,#a29bfe);top:-20px;left:15px;animation:rainDropSplash 1s linear infinite;border-radius:2px;"></div>
+            <div class="raindrop-splash" style="position:absolute;width:3px;height:12px;background:linear-gradient(180deg,transparent,#686de0);top:-15px;right:20px;animation:rainDropSplash 1.3s linear 0.3s infinite;border-radius:2px;"></div>
+            <div class="raindrop-splash" style="position:absolute;width:3px;height:18px;background:linear-gradient(180deg,transparent,#4834d4);top:-25px;left:50%;animation:rainDropSplash 0.8s linear 0.6s infinite;border-radius:2px;"></div>
+        </div>
+        <h1>
+            <span style="display:block;font-size:3rem;font-weight:900;color:#fff;text-shadow:0 0 30px #4834d4,0 0 60px #686de0;letter-spacing:10px;">المكتبة</span>
+            <span style="display:block;font-size:2rem;font-weight:700;color:#a29bfe;text-shadow:0 0 20px #4834d4;letter-spacing:8px;margin-top:0.3rem;">المتوهجة</span>
+        </h1>
+        <div style="margin-top:2.5rem;display:flex;gap:12px;justify-content:center;">
+            <div style="width:3px;height:30px;background:linear-gradient(180deg,#4834d4,transparent);border-radius:2px;animation:rainBar 0.8s ease-in-out infinite;"></div>
+            <div style="width:3px;height:25px;background:linear-gradient(180deg,#686de0,transparent);border-radius:2px;animation:rainBar 0.9s ease-in-out 0.2s infinite;"></div>
+            <div style="width:3px;height:35px;background:linear-gradient(180deg,#4834d4,transparent);border-radius:2px;animation:rainBar 0.7s ease-in-out 0.4s infinite;"></div>
+            <div style="width:3px;height:28px;background:linear-gradient(180deg,#a29bfe,transparent);border-radius:2px;animation:rainBar 1s ease-in-out 0.1s infinite;"></div>
+            <div style="width:3px;height:32px;background:linear-gradient(180deg,#686de0,transparent);border-radius:2px;animation:rainBar 0.85s ease-in-out 0.5s infinite;"></div>
+            <div style="width:3px;height:22px;background:linear-gradient(180deg,#4834d4,transparent);border-radius:2px;animation:rainBar 0.75s ease-in-out 0.3s infinite;"></div>
+        </div>
+        <p style="color:#a29bfe;margin-top:1rem;letter-spacing:4px;font-size:0.8rem;">🌧️ اغمر نفسك بالمعرفة</p>
+    </div>
+</div>
+
+<!-- 🌸 النمط 5: الوردة الكيوت المتطور -->
+<div class="splash-screen" id="splashScreen5" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; z-index:9999; background:linear-gradient(135deg,#fff0f5,#ffe4ec,#fff5f7,#ffe4ec); overflow:hidden; align-items:center; justify-content:center;">
+    <div style="position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none;">
+        <div class="floating-petal" style="position:absolute;top:-30px;left:10%;animation:petalFall 6s ease-in-out infinite;font-size:28px;">🌸</div>
+        <div class="floating-petal" style="position:absolute;top:-30px;left:30%;animation:petalFall 7s ease-in-out 1s infinite;font-size:22px;">🌷</div>
+        <div class="floating-petal" style="position:absolute;top:-30px;left:55%;animation:petalFall 5.5s ease-in-out 2s infinite;font-size:25px;">💮</div>
+        <div class="floating-petal" style="position:absolute;top:-30px;left:75%;animation:petalFall 6.5s ease-in-out 3s infinite;font-size:20px;">🏵️</div>
+        <div class="floating-petal" style="position:absolute;top:-30px;left:90%;animation:petalFall 7.5s ease-in-out 1.5s infinite;font-size:24px;">🌺</div>
+        <div class="floating-heart" style="position:absolute;top:15%;left:10%;animation:heartFloatKawaii 4s ease-in-out infinite;font-size:18px;">💕</div>
+        <div class="floating-heart" style="position:absolute;top:25%;right:15%;animation:heartFloatKawaii 4.5s ease-in-out 0.8s infinite;font-size:14px;">💗</div>
+        <div class="floating-heart" style="position:absolute;bottom:30%;left:12%;animation:heartFloatKawaii 5s ease-in-out 1.5s infinite;font-size:16px;">💖</div>
+        <div class="floating-heart" style="position:absolute;bottom:20%;right:10%;animation:heartFloatKawaii 3.8s ease-in-out 2s infinite;font-size:20px;">💝</div>
+    </div>
+    <div style="position:relative;z-index:1;text-align:center;">
+        <div style="position:relative;width:120px;height:130px;margin:0 auto 2rem;">
+            <div style="position:absolute;top:-15px;left:50%;transform:translateX(-50%);z-index:3;">
+                <div style="position:relative;width:40px;height:35px;">
+                    <div style="position:absolute;width:22px;height:28px;background:linear-gradient(135deg,#ff69b4,#ff1493);border-radius:50% 50% 0 0;left:0;top:0;transform:rotate(-35deg);box-shadow:0 0 15px #ff69b4;"></div>
+                    <div style="position:absolute;width:22px;height:28px;background:linear-gradient(135deg,#ff69b4,#ff1493);border-radius:50% 50% 0 0;right:0;top:0;transform:rotate(35deg);box-shadow:0 0 15px #ff69b4;"></div>
+                    <div style="position:absolute;width:14px;height:14px;background:#fff;border-radius:50%;top:10px;left:50%;transform:translateX(-50%);z-index:2;box-shadow:0 0 10px #fff;"></div>
+                </div>
+            </div>
+            <div style="position:absolute;top:5px;left:10px;width:100px;height:100px;background:linear-gradient(135deg,#ff69b4,#ff1493,#ff69b4);border-radius:30px;display:flex;align-items:center;justify-content:center;box-shadow:0 20px 50px rgba(255,105,180,0.5);animation:kawaiiBounce 2.5s ease-in-out infinite;">
+                <div style="position:absolute;top:12px;left:12px;width:76px;height:76px;background:rgba(255,255,255,0.3);border-radius:20px;"></div>
+                <i class="fas fa-heart" style="font-size:2.5rem;color:#fff;position:relative;z-index:1;filter:drop-shadow(0 0 15px #fff);animation:heartBeat 1.2s ease-in-out infinite;"></i>
+            </div>
+            <div style="position:absolute;bottom:-5px;right:5px;width:22px;height:22px;background:#ffd700;border-radius:50%;animation:starTwinkleKawaii 2s ease-in-out infinite;box-shadow:0 0 15px #ffd700;"></div>
+            <div style="position:absolute;top:0;left:0;width:18px;height:18px;background:#fff;border-radius:50%;animation:starTwinkleKawaii 2.5s ease-in-out 0.5s infinite;box-shadow:0 0 10px #fff;"></div>
+        </div>
+        <h1 style="display:flex;flex-direction:column;gap:0.3rem;">
+            <span style="font-size:2.8rem;font-weight:900;color:#ff1493;text-shadow:0 0 20px #ff69b4,0 0 40px #ffb6c1,0 0 80px #ff69b4;letter-spacing:8px;">المكتبة</span>
+            <span style="font-size:1.8rem;font-weight:700;color:#ff69b4;text-shadow:0 0 15px #ffb6c1;letter-spacing:6px;">المتوهجة</span>
+        </h1>
+        <div style="margin-top:2.5rem;display:flex;gap:16px;justify-content:center;">
+            <div style="width:14px;height:14px;background:#ff69b4;border-radius:50%;animation:kawaiiLoader 1.2s ease-in-out infinite;box-shadow:0 0 15px #ff69b4;"></div>
+            <div style="width:14px;height:14px;background:#ff1493;border-radius:50%;animation:kawaiiLoader 1.2s ease-in-out 0.2s infinite;box-shadow:0 0 15px #ff1493;"></div>
+            <div style="width:14px;height:14px;background:#ffb6c1;border-radius:50%;animation:kawaiiLoader 1.2s ease-in-out 0.4s infinite;box-shadow:0 0 15px #ffb6c1;"></div>
+            <div style="width:14px;height:14px;background:#ff69b4;border-radius:50%;animation:kawaiiLoader 1.2s ease-in-out 0.6s infinite;box-shadow:0 0 15px #ff69b4;"></div>
+        </div>
+        <p style="color:#ff69b4;margin-top:1rem;letter-spacing:4px;font-size:0.8rem;">🌸 معاً نحو عالم أجمل</p>
+    </div>
+</div>
+
+<!-- الشاشة القديمة - مخفية -->
+<div class="splash-screen" id="splashScreen" style="display:none;"></div>
+    <!-- ========================================= -->
+    <!-- 3. القائمة الجانبية (Sidebar)             -->
+    <!-- ========================================= -->
+    <div class="sidebar-overlay" id="sidebarOverlay"></div>
+    <div class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <h2 class="sidebar-logo">المكتبة المتوهجة</h2>
+            <button class="sidebar-close" id="sidebarClose"><i class="fas fa-times"></i></button>
+        </div>
+        <div class="sidebar-content">
+            <div class="sidebar-section">
+                <h3 class="sidebar-section-title">المكتبة</h3>
+                <a href="#" class="sidebar-link active" data-page="home"><i class="fas fa-home"></i><span>الرئيسية</span></a>
+                <a href="#" class="sidebar-link" data-page="all-books"><i class="fas fa-layer-group"></i><span>كل الكتب</span></a>
+                <a href="#" class="sidebar-link" data-page="downloaded"><i class="fas fa-download"></i><span>المحملة</span></a>
+                <a href="#" class="sidebar-link" data-page="favorites"><i class="fas fa-heart"></i><span>المفضلة</span></a>
+            </div>
+            <div class="sidebar-section">
+                <h3 class="sidebar-section-title">تصفح حسب</h3>
+                <a href="#" class="sidebar-link"><i class="fas fa-book"></i><span>روايات</span></a>
+                <a href="#" class="sidebar-link"><i class="fas fa-brain"></i><span>فلسفة</span></a>
+                <a href="#" class="sidebar-link"><i class="fas fa-landmark"></i><span>تاريخ</span></a>
+                <a href="#" class="sidebar-link"><i class="fas fa-flask"></i><span>علوم</span></a>
+                <a href="#" class="sidebar-link"><i class="fas fa-star-and-crescent"></i><span>دينية</span></a>
+                <a href="#" class="sidebar-link"><i class="fas fa-brain"></i><span>نفسي</span></a>
+            </div>
+            <div class="sidebar-section">
+                <h3 class="sidebar-section-title">التطبيق</h3>
+                <a href="#" class="sidebar-link"><i class="fas fa-cog"></i><span>الإعدادات</span></a>
+                <a href="#" class="sidebar-link"><i class="fas fa-info-circle"></i><span>عن المكتبة المتوهجة</span></a>
+                <a href="#" class="sidebar-link"><i class="fas fa-star"></i><span>قيم التطبيق</span></a>
+            </div>
+        </div>
+        <div class="sidebar-footer"><p>v1.0.0 • مكتبتك المتوهجة</p></div>
+    </div>
+
+    <!-- ========================================= -->
+    <!-- 4. شريط التنقل العلوي (Navbar)            -->
+    <!-- ========================================= -->
+    <nav class="navbar">
+        <div class="nav-container">
+            <button class="menu-btn" id="menuToggle"><i class="fas fa-bars"></i></button>
+            <div class="logo-wrapper">
+                <i class="fas fa-book-open logo-icon"></i>
+                <h1 class="logo-text">المكتبة المتوهجة</h1>
+                <span class="logo-badge">مكتبة</span>
+            </div>
+            <div class="nav-actions">
+                <button class="icon-btn" id="searchToggle"><i class="fas fa-search"></i></button>
+                <button class="icon-btn" id="settingsToggle"><i class="fas fa-cog"></i></button>
+                <div class="user-avatar" id="userAvatar"><i class="fas fa-user"></i></div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- ========================================= -->
+    <!-- 5. شريط البحث                             -->
+    <!-- ========================================= -->
+    <div class="search-bar" id="searchBar">
+        <div class="search-container">
+            <i class="fas fa-search search-icon"></i>
+            <input type="text" placeholder="ابحث عن كتاب أو مؤلف..." class="search-input" id="searchInput">
+            <button class="close-search" id="closeSearch"><i class="fas fa-times"></i></button>
+        </div>
+    </div>
+
+    <!-- ========================================= -->
+    <!-- 6. المحتوى الرئيسي (الصفحة الرئيسية)      -->
+    <!-- ========================================= -->
+    <main>
+        <div class="welcome-section">
+            <h2 class="welcome-title"><span class="neon-text">أهلاً بك</span> في عالم الكتب</h2>
+            <p class="welcome-subtitle">استكشف • حمّل • اقرأ بدون إنترنت</p>
+        </div>
+
+        <div class="tabs-container">
+            <button class="tab-btn active" data-tab="home"><i class="fas fa-home"></i><span>الرئيسية</span></button>
+            <button class="tab-btn" data-tab="downloaded"><i class="fas fa-download"></i><span>المحملة</span></button>
+        </div>
+
+        <div class="categories-wrapper">
+            <div class="category-chip active">الكل</div>
+            <div class="category-chip">روايات</div>
+            <div class="category-chip">فلسفة</div>
+            <div class="category-chip">تاريخ</div>
+            <div class="category-chip">علوم</div>
+            <div class="category-chip">دينية</div>
+            <div class="category-chip">نفسي</div>
+        </div>
+
+        <section class="section-container" id="recentSection">
+            <div class="section-header">
+                <h2 class="section-title"><span class="neon-underline">آخر الإضافات</span></h2>
+                <a href="#" class="see-all">عرض الكل ←</a>
+            </div>
+            <div class="horizontal-scroll" id="recentBooks"></div>
+        </section>
+
+        <section class="section-container" id="popularSection">
+            <div class="section-header">
+                <h2 class="section-title"><span class="neon-underline">الأكثر قراءة هذا الشهر</span></h2>
+                <a href="#" class="see-all">عرض الكل ←</a>
+            </div>
+            <div class="horizontal-scroll" id="popularBooks"></div>
+        </section>
+
+                <!-- قسم: المحملة -->
+        <section class="section-container" id="downloadedSection" style="display:none;">
+    <div class="section-header">
+        <h2 class="section-title"><span class="neon-underline">📥 المحملة</span></h2>
+        <a href="#" class="see-all" id="manageDownloadsBtn">⚙️ إدارة التحميلات ←</a>
+    </div>
+    <div class="horizontal-scroll" id="downloadedBooks"></div>
+    </section>
+
+        <div class="empty-state" id="emptyLibraryMessage" style="display:none;"><p>📂 قم بتحميل المزيد من الكتب لتظهر هنا</p></div>
+        <div class="no-results-message" id="noResultsMessage" style="display:none;">
+            <div class="empty-state"><p>🔍 لا توجد كتب في هذا التصنيف حالياً</p></div>
+        </div>
+    </main>
+
+    <!-- ========================================= -->
+    <!-- 7. الصفحة الشخصية (Profile Page)          -->
+    <!-- ========================================= -->
+    <div class="profile-overlay" id="profileOverlay"></div>
+    <div class="profile-page" id="profilePage">
+        <div class="profile-header">
+            <button class="profile-back-btn" id="profileBackBtn"><i class="fas fa-arrow-right"></i></button>
+            <h2 class="profile-title"><i class="fas fa-user-circle"></i>حسابي</h2>
+            <button class="profile-edit-btn" id="editProfileBtn"><i class="fas fa-pen"></i></button>
+        </div>
+        <div class="profile-content">
+            <div class="profile-card">
+                <div class="profile-avatar-wrapper">
+                    <div class="profile-avatar"><i class="fas fa-user"></i></div>
+                    <button class="change-avatar-btn"><i class="fas fa-camera"></i></button>
+                </div>
+                <div class="profile-info">
+                    <h3 class="profile-name" id="profileName">قارئ النيون</h3>
+                    <p class="profile-username">@neon_reader</p>
+                    <p class="profile-bio">📚 عاشق للكتب والقراءة • أكتب اقتباساتي المفضلة</p>
+                </div>
+                <button class="edit-profile-btn" id="editProfileDetailsBtn"><i class="fas fa-pen"></i>تعديل الملف الشخصي</button>
+            </div>
+            <div class="stats-container">
+                <div class="stat-card"><div class="stat-icon"><i class="fas fa-book-open"></i></div><div class="stat-info"><span class="stat-value">24</span><span class="stat-label">كتاب مقروء</span></div></div>
+                <div class="stat-card"><div class="stat-icon"><i class="fas fa-clock"></i></div><div class="stat-info"><span class="stat-value">156</span><span class="stat-label">ساعة قراءة</span></div></div>
+                <div class="stat-card"><div class="stat-icon"><i class="fas fa-bookmark"></i></div><div class="stat-info"><span class="stat-value">42</span><span class="stat-label">علامة مرجعية</span></div></div>
+                <div class="stat-card"><div class="stat-icon"><i class="fas fa-quote-right"></i></div><div class="stat-info"><span class="stat-value">18</span><span class="stat-label">اقتباس</span></div></div>
+            </div>
+            <div class="profile-section">
+                <div class="section-header"><h3 class="profile-section-title"><i class="fas fa-heart"></i>الكتب المفضلة</h3><a href="#" class="see-all-link">عرض الكل →</a></div>
+                <div class="favorite-books-scroll">
+                    <div class="favorite-book-item"><div class="favorite-book-cover"><span>📖</span></div><div class="favorite-book-info"><h4>كليلة ودمنة</h4><p>ابن المقفع</p></div></div>
+                    <div class="favorite-book-item"><div class="favorite-book-cover"><span>📖</span></div><div class="favorite-book-info"><h4>الأيام</h4><p>طه حسين</p></div></div>
+                    <div class="favorite-book-item"><div class="favorite-book-cover"><span>📖</span></div><div class="favorite-book-info"><h4>البخلاء</h4><p>الجاحظ</p></div></div>
+                </div>
+            </div>
+            <div class="profile-section">
+                <div class="section-header"><h3 class="profile-section-title"><i class="fas fa-history"></i>واصل القراءة</h3><a href="#" class="see-all-link">عرض الكل →</a></div>
+                <div class="continue-reading-item"><div class="continue-book-cover"><span>📖</span></div><div class="continue-book-info"><h4>مقدمة ابن خلدون</h4><p>عبد الرحمن بن خلدون</p><div class="progress-bar-container"><div class="progress-bar" style="width:65%;"></div></div><span class="progress-text">65% مكتمل</span></div></div>
+                <div class="continue-reading-item"><div class="continue-book-cover"><span>📖</span></div><div class="continue-book-info"><h4>ألف ليلة وليلة</h4><p>المجلد الأول</p><div class="progress-bar-container"><div class="progress-bar" style="width:32%;"></div></div><span class="progress-text">32% مكتمل</span></div></div>
+            </div>
+            <div class="profile-section">
+                <h3 class="profile-section-title"><i class="fas fa-sliders-h"></i>إعدادات الحساب</h3>
+                <div class="account-settings-list">
+                    <button class="account-setting-btn" id="changeNameBtn"><i class="fas fa-user-edit"></i><span>تغيير الاسم</span><i class="fas fa-chevron-left"></i></button>
+                    <button class="account-setting-btn" id="changePasswordBtn"><i class="fas fa-lock"></i><span>تغيير كلمة المرور</span><i class="fas fa-chevron-left"></i></button>
+                    <button class="account-setting-btn" id="readingGoalBtn"><i class="fas fa-bullseye"></i><span>هدف القراءة السنوي</span><span class="goal-badge">30 كتاب</span><i class="fas fa-chevron-left"></i></button>
+                    <button class="account-setting-btn" id="backupDataBtn"><i class="fas fa-cloud-upload-alt"></i><span>نسخ احتياطي للبيانات</span><i class="fas fa-chevron-left"></i></button>
+                </div>
+            </div>
+            <button class="logout-btn" id="logoutBtn"><i class="fas fa-sign-out-alt"></i>تسجيل الخروج</button>
+            <p class="profile-footer-text">المكتبة المتوهجة v1.0.0</p>
+        </div>
+    </div>
+
+    <!-- ========================================= -->
+    <!-- 8. نافذة تعديل الملف الشخصي               -->
+    <!-- ========================================= -->
+    <div class="modal-overlay" id="editProfileOverlay"></div>
+    <div class="edit-profile-modal" id="editProfileModal">
+        <div class="modal-header"><h3 class="modal-title"><i class="fas fa-user-edit"></i>تعديل الملف الشخصي</h3><button class="modal-close" id="closeEditProfileModal"><i class="fas fa-times"></i></button></div>
+        <div class="modal-content">
+            <div class="edit-section"><label class="edit-label">الصورة الشخصية</label><div class="avatar-edit-wrapper"><div class="avatar-preview" id="avatarPreview"><i class="fas fa-user"></i></div><div class="avatar-actions"><button class="avatar-action-btn" id="chooseAvatarBtn"><i class="fas fa-image"></i>اختر صورة</button><button class="avatar-action-btn" id="removeAvatarBtn"><i class="fas fa-trash"></i>إزالة</button></div><input type="file" id="avatarInput" accept="image/*" style="display:none;"></div></div>
+            <div class="edit-section"><label class="edit-label" for="newProfileName">الاسم</label><input type="text" id="newProfileName" class="edit-input" value="قارئ النيون"></div>
+            <div class="edit-section"><label class="edit-label" for="newUsername">اسم المستخدم</label><input type="text" id="newUsername" class="edit-input" value="@neon_reader"></div>
+            <div class="edit-section"><label class="edit-label" for="newBio">الوصف</label><textarea id="newBio" class="edit-textarea" rows="3">📚 عاشق للكتب والقراءة • أكتب اقتباساتي المفضلة</textarea></div>
+        </div>
+        <div class="modal-footer"><button class="modal-cancel-btn" id="cancelEditProfile">إلغاء</button><button class="modal-save-btn" id="saveEditProfile"><i class="fas fa-check"></i>حفظ التغييرات</button></div>
+    </div>
+
+    <!-- ========================================= -->
+    <!-- 9. صفحة التصنيف (Category Page)           -->
+    <!-- ========================================= -->
+    <div class="category-overlay" id="categoryOverlay"></div>
+    <div class="category-page" id="categoryPage">
+        <div class="category-header">
+            <button class="category-back-btn" id="categoryBackBtn"><i class="fas fa-arrow-right"></i></button>
+            <h2 class="category-title" id="categoryTitle"><i class="fas fa-book"></i><span>روايات</span></h2>
+            <div class="category-view-options">
+                <div class="view-toggle">
+                    <button class="view-btn" data-view="grid" id="viewGridBtn"><i class="fas fa-th-large"></i></button>
+                    <button class="view-btn active" data-view="list" id="viewListBtn"><i class="fas fa-list"></i></button>
+                </div>
+                <button class="category-filter-btn" id="openFilterModalBtn"><i class="fas fa-sliders-h"></i></button>
+            </div>
+        </div>
+        <div class="filter-bar" id="filterBar">
+            <button class="filter-btn active" data-filter="recent"><i class="fas fa-clock"></i><span>المضافة مؤخراً</span></button>
+            <button class="filter-btn" data-filter="popular"><i class="fas fa-fire"></i><span>الأكثر قراءة</span></button>
+        </div>
+        <div class="category-stats"><span id="categoryBookCount">12 كتاب</span></div>
+        <div class="category-books-list" id="categoryBooksList"></div>
+        <div class="no-books-message" id="noCategoryBooksMessage" style="display:none;"><div class="empty-state"><i class="fas fa-book-open" style="font-size:3rem;opacity:0.5;"></i><p>📭 لا توجد كتب في هذا القسم حالياً</p></div></div>
+    </div>
+
+    <!-- ========================================= -->
+    <!-- 10. نافذة الفلتر المنبثقة (Filter Modal)  -->
+    <!-- ========================================= -->
+    <div class="filter-modal-overlay" id="filterModalOverlay"></div>
+    <div class="filter-modal" id="filterModal">
+        <div class="filter-modal-header"><h3 class="filter-modal-title"><i class="fas fa-sliders-h"></i>تصفية وترتيب</h3><button class="filter-modal-close" id="filterModalClose"><i class="fas fa-times"></i></button></div>
+        <div class="filter-modal-content">
+            <div class="filter-section"><label class="filter-label"><i class="fas fa-search"></i>بحث في الكتب</label><div class="filter-search-wrapper"><i class="fas fa-search filter-search-icon"></i><input type="text" class="filter-search-input" id="filterSearchInput" placeholder="ابحث عن كتاب أو مؤلف..."></div></div>
+            <div class="filter-section"><label class="filter-label"><i class="fas fa-tags"></i>التصنيفات</label><div class="filter-categories-grid" id="filterCategoriesGrid">
+                <label class="filter-checkbox-item"><input type="checkbox" value="الكل" checked><span class="checkbox-custom"></span><span>الكل</span></label>
+                <label class="filter-checkbox-item"><input type="checkbox" value="روايات"><span class="checkbox-custom"></span><span>روايات</span></label>
+                <label class="filter-checkbox-item"><input type="checkbox" value="فلسفة"><span class="checkbox-custom"></span><span>فلسفة</span></label>
+                <label class="filter-checkbox-item"><input type="checkbox" value="تاريخ"><span class="checkbox-custom"></span><span>تاريخ</span></label>
+                <label class="filter-checkbox-item"><input type="checkbox" value="علوم"><span class="checkbox-custom"></span><span>علوم</span></label>
+                <label class="filter-checkbox-item"><input type="checkbox" value="دينية"><span class="checkbox-custom"></span><span>دينية</span></label>
+            </div></div>
+            <div class="filter-section"><label class="filter-label"><i class="fas fa-arrow-down-wide-short"></i>الترتيب حسب</label><div class="filter-radio-group">
+                <label class="filter-radio-item"><input type="radio" name="filterSortBy" value="recent" checked><span class="radio-custom"></span><span><i class="fas fa-clock"></i>المضافة مؤخراً</span></label>
+                <label class="filter-radio-item"><input type="radio" name="filterSortBy" value="popular"><span class="radio-custom"></span><span><i class="fas fa-fire"></i>الأكثر قراءة</span></label>
+                <label class="filter-radio-item"><input type="radio" name="filterSortBy" value="rated"><span class="radio-custom"></span><span><i class="fas fa-star"></i>الأعلى تقييماً</span></label>
+            </div></div>
+        </div>
+        <div class="filter-modal-footer"><button class="filter-reset-all" id="filterResetAll"><i class="fas fa-undo-alt"></i>إعادة ضبط</button><button class="filter-apply-all" id="filterApplyAll"><i class="fas fa-check"></i>تطبيق</button></div>
+    </div>
+
+    <!-- ========================================= -->
+    <!-- 11. نافذة قادم قريباً                      -->
+    <!-- ========================================= -->
+    <div class="coming-soon-overlay" id="comingSoonOverlay"></div>
+    <div class="coming-soon-modal" id="comingSoonModal">
+        <div class="coming-soon-content"><i class="fas fa-star coming-soon-icon"></i><h3>✨ قادم قريباً</h3><p>ميزة ترتيب الكتب حسب التقييم</p><p class="coming-soon-desc">ستتمكن قريباً من تقييم الكتب ومشاهدة الأعلى تقييماً</p><button class="coming-soon-btn" id="closeComingSoonModal">حسناً</button></div>
+    </div>
+
+    <!-- ========================================= -->
+<!-- 12. نافذة الإعدادات (Settings Modal)      -->
+<!-- ========================================= -->
+<div class="settings-overlay" id="settingsOverlay"></div>
+<div class="settings-modal" id="settingsModal">
+    <div class="settings-header"><h2 class="settings-title"><i class="fas fa-cog fa-spin"></i>الإعدادات</h2><button class="settings-close" id="settingsClose"><i class="fas fa-times"></i></button></div>
+    <div class="settings-content">
+        <div class="settings-section">
+            <h3 class="settings-section-title"><i class="fas fa-palette"></i>المظهر والسمات</h3>
+            <div class="setting-item setting-item-column">
+                <div class="setting-info"><span class="setting-label">السمة (Theme)</span><span class="setting-desc">اختر مظهر التطبيق</span></div>
+                <div class="theme-selector">
+                    <button class="theme-btn active" data-theme="neon-dark"><span class="theme-preview neon-dark-preview"></span><span class="theme-name">نيون داكن</span></button>
+                    <button class="theme-btn" data-theme="dark-simple"><span class="theme-preview dark-simple-preview"></span><span class="theme-name">داكن بسيط</span></button>
+                    <button class="theme-btn" data-theme="neon-light"><span class="theme-preview neon-light-preview"></span><span class="theme-name">نيون فاتح</span></button>
+                    <button class="theme-btn" data-theme="light-simple"><span class="theme-preview light-simple-preview"></span><span class="theme-name">فاتح بسيط</span></button>
+                    <button class="theme-btn" data-theme="kawaii-pink"> <span class="theme-preview kawaii-pink-preview"></span><span class="theme-name">الوردة الكيوت 🌸</span></button>
+                </div>
+            </div>
+            <div class="setting-item"><div class="setting-info"><span class="setting-label">لون النيون</span><span class="setting-desc">اختر لون الإضاءة المفضل</span></div>
+            <div class="color-options">
+                <button class="color-btn active" data-color="cyan" style="background:#00ffc3;"></button>
+                <button class="color-btn" data-color="pink" style="background:#ff4da6;"></button>
+                <button class="color-btn" data-color="purple" style="background:#b84dff;"></button>
+                <button class="color-btn" data-color="gold" style="background:#ffd700;"></button>
+                <button class="color-btn" data-color="blue" style="background:#4da6ff;"></button>
+                <button class="color-btn" data-color="green" style="background:#4dff88;"></button>
+                <button class="color-btn" data-color="orange" style="background:#ffa64d;"></button>
+                <button class="color-btn" data-color="red" style="background:#ff4d4d;"></button>
+            </div></div>
+            <div class="setting-item"><div class="setting-info"><span class="setting-label">سطوع النيون</span><span class="setting-desc" id="neonBrightnessValue">عالٍ</span></div><div class="slider-container"><input type="range" id="neonBrightnessSlider" min="0" max="3" value="3" step="1"><div class="slider-labels"><span>مطفأ</span><span>منخفض</span><span>متوسط</span><span>عالٍ</span></div></div></div>
+        </div>
+        <div class="settings-section"><h3 class="settings-section-title"><i class="fas fa-book-open"></i>القراءة</h3><div class="setting-item"><div class="setting-info"><span class="setting-label">حجم الخط</span><span class="setting-desc" id="fontSizeValue">متوسط</span></div><div class="slider-container"><input type="range" id="fontSizeSlider" min="1" max="3" value="2" step="1"><div class="slider-labels"><span>صغير</span><span>متوسط</span><span>كبير</span></div></div></div></div>
+        <div class="settings-section"><h3 class="settings-section-title"><i class="fas fa-download"></i>التحميلات</h3><button class="clear-downloads-btn" id="clearDownloads"><i class="fas fa-trash-alt"></i>مسح جميع التحميلات</button></div>
+        <div class="settings-section"><h3 class="settings-section-title"><i class="fas fa-play-circle"></i>شاشة البداية</h3>
+            <div class="splash-style-selector">
+                <button class="splash-style-btn active" data-splash="1"><span class="splash-style-preview style-space-preview"></span><span class="splash-style-name">🌌 الفضاء</span></button>
+                <button class="splash-style-btn" data-splash="2"><span class="splash-style-preview style-gold-preview"></span><span class="splash-style-name">✨ الذهبي</span></button>
+                <button class="splash-style-btn" data-splash="3"><span class="splash-style-preview style-fire-preview"></span><span class="splash-style-name">🔥 الناري</span></button>
+                <button class="splash-style-btn" data-splash="4"><span class="splash-style-preview style-rain-preview"></span><span class="splash-style-name">🌧️ الماطر</span></button>
+                <button class="splash-style-btn" data-splash="5"><span class="splash-style-preview style-kawaii-preview"></span><span class="splash-style-name">🌸 الوردة الكيوت</span></button>
+            </div>
+        </div>
+        <div class="settings-section"><h3 class="settings-section-title"><i class="fas fa-info-circle"></i>عن التطبيق</h3><div class="about-info"><div class="about-row"><span>الإصدار</span><span class="neon-badge">v1.0.0</span></div><div class="about-row"><span>المطور</span><span>Rayan</span></div><div class="about-row"><span>الترخيص</span><span>مفتوح المصدر</span></div></div></div>
+    </div>
+    <div class="settings-footer"><button class="settings-save-btn" id="saveSettings"><i class="fas fa-check"></i>حفظ الإعدادات</button><button class="settings-reset-btn" id="resetSettings"><i class="fas fa-undo-alt"></i>إعادة للافتراضي</button></div>
+</div>
+    <!-- ========================================= -->
+    <!-- 13. حاوية الإشعارات (Toast Container)     -->
+    <!-- ========================================= -->
+    <div class="toast-container" id="toastContainer"></div>
+
+    <!-- ========================================= -->
+    <!-- 14. صفحة تفاصيل الكتاب (Book Details)     -->
+    <!-- ========================================= -->
+    <div class="book-details-overlay" id="bookDetailsOverlay"></div>
+    <div class="book-details-page" id="bookDetailsPage">
+        <div class="book-details-header">
+            <button class="details-back-btn" id="detailsBackBtn"><i class="fas fa-arrow-right"></i></button>
+            <h3 class="details-title">تفاصيل الكتاب</h3>
+            <button class="details-share-btn" id="detailsShareBtn"><i class="fas fa-share-alt"></i></button>
+        </div>
+        <div class="book-details-content" id="bookDetailsContent"><!-- يتم ملؤها ديناميكياً --></div>
+    </div>
+
+    <!-- ========================================= -->
+    <!-- 15. ملف الجافا سكريبت الرئيسي             -->
+    <!-- ========================================= -->
+    <script src="books.js"></script>
+<script src="app.js"></script>
+    <!-- ========================================= -->
+<!-- زخارف كيوت (تظهر فقط في السمة الوردية)     -->
+<!-- ========================================= -->
+<div class="kawaii-ribbon-1"></div>
+<div class="kawaii-star" style="top:15%;right:10%;"></div>
+<div class="kawaii-star" style="top:35%;left:8%;animation-delay:1s;"></div>
+<div class="kawaii-star" style="bottom:25%;right:15%;animation-delay:2s;"></div>
+<div class="kawaii-heart" style="top:20%;left:15%;"></div>
+<div class="kawaii-heart" style="bottom:30%;right:8%;animation-delay:1.5s;"></div>
+<div class="kawaii-heart" style="top:50%;right:12%;animation-delay:3s;"></div>
+<div class="kawaii-flower" style="top:10%;right:25%;"></div>
+<div class="kawaii-flower" style="bottom:15%;left:12%;animation-delay:2s;"></div>
+<div class="kawaii-flower" style="top:40%;left:20%;animation-delay:4s;"></div>
+
+</body>
+</html>
